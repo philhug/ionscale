@@ -24,12 +24,12 @@ checksum:
   name_template: "checksums.txt"
 
 dockers:
-  - image_templates: [ "ghcr.io/jsiebens/{{ .ProjectName }}:{{ .Version }}-amd64" ]
+  - image_templates: [ "ghcr.io/philhug/{{ .ProjectName }}:{{ .Version }}-amd64" ]
     dockerfile: Dockerfile
     use: buildx
     build_flag_templates:
       - --platform=linux/amd64
-  - image_templates: [ "ghcr.io/jsiebens/{{ .ProjectName }}:{{ .Version }}-arm64" ]
+  - image_templates: [ "ghcr.io/philhug/{{ .ProjectName }}:{{ .Version }}-arm64" ]
     goarch: arm64
     dockerfile: Dockerfile
     use: buildx
@@ -37,14 +37,14 @@ dockers:
       - --platform=linux/arm64
 
 docker_manifests:
-  - name_template: ghcr.io/jsiebens/{{ .ProjectName }}:{{ .Version }}
+  - name_template: ghcr.io/philhug/{{ .ProjectName }}:{{ .Version }}
     image_templates:
-      - ghcr.io/jsiebens/{{ .ProjectName }}:{{ .Version }}-amd64
-      - ghcr.io/jsiebens/{{ .ProjectName }}:{{ .Version }}-arm64
-  - name_template: ghcr.io/jsiebens/{{ .ProjectName }}:latest
+      - ghcr.io/philhug/{{ .ProjectName }}:{{ .Version }}-amd64
+      - ghcr.io/philhug/{{ .ProjectName }}:{{ .Version }}-arm64
+  - name_template: ghcr.io/philhug/{{ .ProjectName }}:latest
     image_templates:
-      - ghcr.io/jsiebens/{{ .ProjectName }}:{{ .Version }}-amd64
-      - ghcr.io/jsiebens/{{ .ProjectName }}:{{ .Version }}-arm64
+      - ghcr.io/philhug/{{ .ProjectName }}:{{ .Version }}-amd64
+      - ghcr.io/philhug/{{ .ProjectName }}:{{ .Version }}-arm64
 
 signs:
   - cmd: cosign
