@@ -3,17 +3,19 @@ package dns
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/imdario/mergo"
 	"github.com/jsiebens/ionscale/internal/config"
 	"github.com/jsiebens/ionscale/internal/mapping"
 	"github.com/libdns/azure"
+	"github.com/libdns/bunny"
 	"github.com/libdns/cloudflare"
 	"github.com/libdns/digitalocean"
 	"github.com/libdns/googleclouddns"
 	"github.com/libdns/libdns"
 	"github.com/libdns/route53"
-	"strings"
-	"time"
 )
 
 type Provider interface {
@@ -33,6 +35,8 @@ func NewProvider(config config.DNS) (Provider, error) {
 	switch p.Name {
 	case "azure":
 		return configureAzureProvider(p.Zone, p.Configuration)
+	case "bunny":
+		return configureBunnyProvider(p.Zone, p.Configuration)
 	case "cloudflare":
 		return configureCloudflareProvider(p.Zone, p.Configuration)
 	case "digitalocean":
@@ -58,6 +62,24 @@ func configureAzureProvider(zone string, values map[string]string) (Provider, er
 		ClientSecret:      config.GetString("IONSCALE_DNS_AZURE_CLIENT_SECRET", ""),
 		SubscriptionId:    config.GetString("IONSCALE_DNS_AZURE_SUBSCRIPTION_ID", ""),
 		ResourceGroupName: config.GetString("IONSCALE_DNS_AZURE_RESOURCE_GROUP_NAME", ""),
+	}
+
+	// merge env configuration on top of the default/file configuration
+	if err := mergo.Merge(p, e, mergo.WithOverride); err != nil {
+		return nil, err
+	}
+
+	return &externalProvider{zone: fqdn(zone), setter: p}, nil
+}
+
+func configureBunnyProvider(zone string, values map[string]string) (Provider, error) {
+	p := &bunny.Provider{}
+	if err := mapping.CopyViaJson(values, p); err != nil {
+		return nil, err
+	}
+
+	e := &bunny.Provider{
+		AccessKey: config.GetString("IONSCALE_DNS_BUNNY_ACCESS_KEY", ""),
 	}
 
 	// merge env configuration on top of the default/file configuration
